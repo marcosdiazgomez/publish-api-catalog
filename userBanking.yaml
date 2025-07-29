@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: API de Aseguradora - Usuarios
+  description: Una API para consultar la información de los usuarios (asegurados) de una compañía de seguros.
+  version: "1.0.1"
+  contact:
+    name: Equipo de Desarrollo API
+    url: https://api.ejemploaseguradora.com/support
+    email: devteam@ejemploaseguradora.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.ejemploaseguradora.com/v1
+    description: Servidor de Producción
+  - url: https://sandbox-api.ejemploaseguradora.com/v1
+    description: Servidor de Pruebas (Sandbox)
+
+tags:
+  - name: Usuarios
+    description: Operaciones relacionadas con los usuarios asegurados.
+
+paths:
+  /usuarios:
+    get:
+      tags:
+        - Usuarios
+      summary: Consultar lista de usuarios asegurados
+      description: |
+        Obtiene una lista de todos los usuarios asegurados.
+        Permite filtrar los resultados por nombre y/o número de póliza para refinar la búsqueda.
+      operationId: getUsuarios
+      parameters:
+        - name: nombre
+          in: query
+          description: "Filtrar la lista de usuarios por su nombre. La búsqueda no distingue mayúsculas de minúsculas y busca coincidencias parciales."
+          required: false
+          schema:
+            type: string
+          example: "Ana García"
+        - name: numero_poliza
+          in: query
+          description: "Filtrar usuarios que tengan una póliza específica activa."
+          required: false
+          schema:
+            type: string
+          example: "POL-987654321"
+        - name: limit
+          in: query
+          description: "Número máximo de usuarios a devolver."
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: "Número de usuarios a omitir para la paginación."
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Búsqueda exitosa. Devuelve una lista de usuarios.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usuario'
+        '400':
+          description: Solicitud incorrecta debido a parámetros inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No se encontraron usuarios que coincidan con los criterios de búsqueda.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Usuario:
+      type: object
+      required:
+        - idUsuario
+        - nombreCompleto
+        - fechaNacimiento
+        - email
+        - polizas
+      properties:
+        idUsuario:
+          type: string
+          format: uuid
+          description: "Identificador único universal para el usuario."
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        nombreCompleto:
+          type: string
+          description: "Nombre y apellidos del asegurado."
+          example: "Ana Sofía García López"
+        fechaNacimiento:
+          type: string
+          format: date
+          description: "Fecha de nacimiento del usuario."
+          example: "1985-05-20"
+        email:
+          type: string
+          format: email
+          description: "Dirección de correo electrónico de contacto."
+          example: "ana.garcia@email.com"
+        telefono:
+          type: string
+          description: "Número de teléfono de contacto del usuario."
+          example: "+52 55 1234 5678"
+        direccion:
+          $ref: '#/components/schemas/Direccion'
+        polizas:
+          type: array
+          description: "Lista de pólizas asociadas al usuario."
+          items:
+            $ref: '#/components/schemas/PolizaResumen'
+
+    PolizaResumen:
+      type: object
+      properties:
+        numeroPoliza:
+          type: string
+          description: "Número identificador de la póliza."
+          example: "POL-987654321"
+        tipo:
+          type: string
+          description: "Tipo de seguro."
+          enum: [Auto, Vida, Gastos Medicos, Hogar, Dental]
+          example: "Gastos Medicos"
+        estado:
+          type: string
+          description: "Estado actual de la póliza."
+          enum: [Activa, Vencida, Cancelada]
+          example: "Activa"
+
+    Direccion:
+      type: object
+      properties:
+        calle:
+          type: string
+          example: "Av. de la Reforma 222"
+        ciudad:
+          type: string
+          example: "Ciudad de México"
+        estado:
+          type: string
+          example: "CDMX"
+        codigoPostal:
+          type: string
+          example: "06600"
+        pais:
+          type: string
+          example: "México"
+
+    Error:
+      type: object
+      required:
+        - codigo
+        - mensaje
+      properties:
+        codigo:
+          type: string
+          description: "Un código de error legible por máquina."
+          example: "INVALID_PARAMETER"
+        mensaje:
+          type: string
+          description: "Una descripción del error legible por humanos."
+          example: "El parámetro 'limit' excede el valor máximo permitido de 100."
+        detalles:
+          type: string
+          description: "Información adicional sobre el error."
+          example: "El valor proporcionado fue 150."
+

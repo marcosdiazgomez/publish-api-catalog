@@ -1,0 +1,14 @@
+#%Catalog Descriptor 1.0
+projects:
+  - main: userBanking.yaml
+    assetId: orders-management-system-api
+    version: 1.0.0
+    apiVersion: v1
+    contact:
+      name: 'John Connor'
+      email: 'john.connor@skynet.org'
+    tags:
+      - logistics
+      - commerce
+    documentation:
+      Home: home.md
