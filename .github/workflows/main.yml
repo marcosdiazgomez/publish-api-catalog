@@ -1,0 +1,32 @@
+# This is a basic workflow to help you get started with Actions
+name: Publish REST API to Exchange
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  publish-exchange:
+    # Build Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Install api-catalog cli
+        run: |
+          sudo apt-get update
+          npm install -g api-catalog-cli@latest
+      - name: Publish API to Anypoint Exchange
+        run: |
+          api-catalog conf username marcosivan
+          api-catalog conf password Mexico2021. 
+          api-catalog conf organization "cd4a8614-cb89-40c8-9b23-9c58d8cafa5a" 
+          api-catalog publish-asset
